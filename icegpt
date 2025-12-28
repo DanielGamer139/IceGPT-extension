@@ -57,7 +57,7 @@
         });
 
         const data = await response.json();
-
+        console.log("DEBUG:", data);
         if (data && data.choices && data.choices[0] && data.choices[0].message) {
           this.lastResponse = data.choices[0].message.content;
         } else {
