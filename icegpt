@@ -4,8 +4,6 @@
   class IceGPT {
     constructor(runtime) {
       this.runtime = runtime;
-
-      // Store the latest response
       this.lastResponse = "";
     }
 
@@ -50,7 +48,7 @@
       };
 
       try {
-        const response = await fetch("https://penguin-ai-groq.danielmat639.workers.dev/", {
+        const response = await fetch("https://penguin-ai-groq.danielmat639.workers.dev/v1/chat/completions", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -59,7 +57,13 @@
         });
 
         const data = await response.json();
-        this.lastResponse = data.choices[0].message.content;
+
+        if (data && data.choices && data.choices[0] && data.choices[0].message) {
+          this.lastResponse = data.choices[0].message.content;
+        } else {
+          this.lastResponse = "IceGPT Error: " + JSON.stringify(data);
+        }
+
       } catch (e) {
         this.lastResponse = "IceGPT Error: " + e;
       }
