@@ -1,0 +1,79 @@
+(function(Scratch) {
+  'use strict';
+
+  class IceGPT {
+    constructor(runtime) {
+      this.runtime = runtime;
+
+      // Store the latest response
+      this.lastResponse = "";
+    }
+
+    getInfo() {
+      return {
+        id: 'icegpt',
+        name: 'IceGPT',
+        blocks: [
+          {
+            opcode: 'ask',
+            blockType: Scratch.BlockType.COMMAND,
+            text: 'ask IceGPT [TEXT]',
+            arguments: {
+              TEXT: { type: Scratch.ArgumentType.STRING, defaultValue: 'Hello IceGPT!' }
+            }
+          },
+          {
+            opcode: 'quickAsk',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'quick ask IceGPT [TEXT]',
+            arguments: {
+              TEXT: { type: Scratch.ArgumentType.STRING, defaultValue: 'Say something' }
+            }
+          },
+          {
+            opcode: 'latestResponse',
+            blockType: Scratch.BlockType.REPORTER,
+            text: 'latest response'
+          }
+        ]
+      };
+    }
+
+    async ask(args) {
+      const prompt = args.TEXT;
+
+      const body = {
+        model: "llama-3.1-8b-instant",
+        messages: [
+          { role: "user", content: prompt }
+        ]
+      };
+
+      try {
+        const response = await fetch("https://penguin-ai-groq.danielmat639.workers.dev/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+        this.lastResponse = data.choices[0].message.content;
+      } catch (e) {
+        this.lastResponse = "IceGPT Error: " + e;
+      }
+    }
+
+    async quickAsk(args) {
+      await this.ask(args);
+      return this.lastResponse;
+    }
+
+    latestResponse() {
+      return this.lastResponse;
+    }
+  }
+
+  Scratch.extensions.register(new IceGPT());
+})(Scratch);
